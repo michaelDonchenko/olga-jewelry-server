@@ -9,7 +9,11 @@ exports.authCheck = async (req, res, next) => {
     next()
   } catch (error) {
     console.log(error)
-    res.status(401).send('Invalid or expired token, try to re-log ')
+    res
+      .status(401)
+      .json({
+        error: 'Invalid or expired token, Refresh the page and try again ',
+      })
   }
 }
 
@@ -19,7 +23,7 @@ exports.adminCheck = async (req, res, next) => {
   const adminUser = await User.findOne({ email }).exec()
 
   if (adminUser.role !== 'admin') {
-    res.status(403).send('Admin resource. Access denied.')
+    res.status(403).json({ error: 'Admin resource. Access denied.' })
   } else {
     next()
   }

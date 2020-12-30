@@ -6,10 +6,10 @@ exports.create = async (req, res) => {
   try {
     const { name } = req.body
 
-    if (name.length < 2 || name.length > 32) {
+    if (name.length < 2 || name.length > 64) {
       return res
         .status(400)
-        .json({ error: 'Name has to be between 2 and 32 characters' })
+        .json({ error: 'Name has to be between 2 and 64 characters' })
     }
 
     const categoryExist = await Category.findOne({ name: name }).exec()
@@ -38,20 +38,6 @@ exports.read = async (req, res) => {
     category,
     products,
   })
-}
-
-exports.update = async (req, res) => {
-  const { name } = req.body
-  try {
-    const updated = await Category.findOneAndUpdate(
-      { slug: req.params.slug },
-      { name, slug: slugify(name) },
-      { new: true }
-    )
-    res.json(updated)
-  } catch (err) {
-    res.status(400).send(err.message)
-  }
 }
 
 exports.remove = async (req, res) => {

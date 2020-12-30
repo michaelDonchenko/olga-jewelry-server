@@ -7,19 +7,11 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
-      maxlength: [80, 'Name is too long'],
-      unique: [true, 'The name has to be unique'],
     },
-    slug: {
-      type: String,
-      unique: true,
-      lowercase: true,
-      index: true,
-    },
+
     description: {
       type: String,
       required: true,
-      maxlength: [2000, 'description cannot be more than 2000 chars'],
     },
     price: {
       type: Number,
