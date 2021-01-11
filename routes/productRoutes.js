@@ -18,7 +18,7 @@ router.post('/product', authCheck, adminCheck, create)
 router.delete('/product', authCheck, adminCheck, remove)
 router.get('/product/:id', read)
 router.put('/product/:id', authCheck, adminCheck, update)
-router.get('/products', listAll)
+router.post('/list-products', listAll)
 router.post('/products', list)
 
 module.exports = router

@@ -40,17 +40,33 @@ exports.create = async (req, res) => {
 }
 
 exports.listAll = async (req, res) => {
+  //pagination variables
+  const pageSize = req.query.pageSize || 8
+  const page = Number(req.query.pageNumber) || 1
+  const count = await Product.estimatedDocumentCount({})
+
+  //filter varialbles
+  const sort = req.body.sort || 'createdAt'
+  const order = req.body.order || -1
+
   try {
     const products = await Product.find({})
+      .limit(parseInt(pageSize))
+      .skip(pageSize * (page - 1))
       .populate('category')
-      .sort([['createdAt', -1]])
+      .sort([[sort, Number(order)]])
 
     if (!products) {
       return res.status(400).json({
         error: 'Could not find products',
       })
     }
-    res.json(products)
+    res.json({
+      products,
+      page,
+      pages: Math.ceil(count / pageSize),
+      pageSize: pageSize,
+    })
   } catch (error) {
     console.log(error)
     res.status(500).json({

@@ -29,14 +29,24 @@ exports.list = async (req, res) =>
   res.json(await Category.find({}).sort({ createdAt: -1 }).exec())
 
 exports.read = async (req, res) => {
-  let category = await Category.findOne({ slug: req.params.slug }).exec()
+  const category = await Category.findOne({ slug: req.params.slug }).exec()
+
+  const pageSize = req.query.pageSize || 8
+  const page = Number(req.query.pageNumber) || 1
+  const count = await Product.countDocuments({ category: category._id })
+
   const products = await Product.find({ category: category._id })
+    .limit(parseInt(pageSize))
+    .skip(pageSize * (page - 1))
     .populate('category')
     .exec()
 
   res.json({
     category,
     products,
+    page,
+    pages: Math.ceil(count / pageSize),
+    pageSize: pageSize,
   })
 }
 
