@@ -2,6 +2,7 @@ const User = require('../models/userModel')
 const Product = require('../models/productModel')
 const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
+const Message = require('../models/messageModel')
 const uniqueid = require('uniqid')
 
 exports.userCart = async (req, res) => {
@@ -155,8 +156,8 @@ exports.createOrder = async (req, res) => {
 exports.readOrder = async (req, res) => {
   try {
     const id = req.params.id
+
     const order = await Order.findById(id)
-      .exec()
       .populate('products.product')
       .populate('orderdBy')
       .exec()
@@ -164,6 +165,13 @@ exports.readOrder = async (req, res) => {
     if (!order) {
       return res.status(400).json({ error: 'Order not found' })
     }
+
+    if (order.orderdBy.email !== req.user.email) {
+      return res
+        .status(400)
+        .json({ error: 'Access Denied order is not ordered by the user.' })
+    }
+
     res.json(order)
   } catch (error) {
     console.log(error)
@@ -179,16 +187,24 @@ exports.orders = async (req, res) => {
     .sort([['createdAt', 'desc']])
     .exec()
 
+  if (!userOrders) {
+    return res.status(400).json({ error: 'No orders found' })
+  }
+
   res.json(userOrders)
 }
 
 exports.paypalPayment = async (req, res) => {
   try {
     const id = req.params.id
-    const order = await Order.findByIdAndUpdate(id, req.body.paymentSuccess, {
-      new: true,
-    })
-      .exec()
+
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { isPaid: req.body.isPaid },
+      {
+        new: true,
+      }
+    )
       .populate('products.product')
       .populate('orderdBy')
       .exec()
@@ -200,5 +216,23 @@ exports.paypalPayment = async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ error: error })
+  }
+}
+
+exports.message = async (req, res) => {
+  const { email, subject, message } = req.body
+  if (!email || !subject || !message) {
+    res.status(400).json({ error: 'All fields required' })
+  }
+  try {
+    await new Message({
+      email,
+      subject,
+      message,
+    }).save()
+
+    res.status(201).json({ ok: true })
+  } catch (error) {
+    res.status(400).json({ error: error.message })
   }
 }

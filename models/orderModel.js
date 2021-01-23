@@ -18,20 +18,15 @@ const orderSchema = new mongoose.Schema(
     orderStatus: {
       type: String,
       default: 'Not Processed',
-      enum: ['Not Processed', 'processing', 'Cancelled', 'Delivered'],
+      enum: ['Not Processed', 'Processing', 'Cancelled', 'Delivered'],
     },
     orderdBy: { type: ObjectId, ref: 'User' },
     isPaid: {
       type: Boolean,
       default: false,
     },
-    trackNumber: {
-      type: Object,
-      default: {
-        number: '',
-        url: '',
-      },
-    },
+    trackNumber: { type: String, default: '' },
+    url: { type: String, default: '' },
   },
   { timestamps: true }
 )
