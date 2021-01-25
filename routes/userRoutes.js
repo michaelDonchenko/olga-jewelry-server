@@ -15,6 +15,7 @@ const {
   readOrder,
   paypalPayment,
   message,
+  readMessages,
 } = require('../controllers/userControllers')
 
 router.post('/user/cart', authCheck, userCart)
@@ -26,6 +27,8 @@ router.delete('/user/cart', authCheck, emptyCart)
 router.post('/user/personal-info', authCheck, savePersonalInfo)
 
 router.post('/user/message', authCheck, message)
+
+router.get('/user/messages', authCheck, readMessages)
 
 router.post('/user/order', authCheck, createOrder)
 

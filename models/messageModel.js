@@ -7,9 +7,9 @@ const messageSchema = new mongoose.Schema(
       type: ObjectId,
       ref: 'User',
     },
-    email: String,
     subject: String,
     message: String,
+    answer: { type: String, default: null },
   },
   { timestamps: true }
 )

@@ -220,19 +220,50 @@ exports.paypalPayment = async (req, res) => {
 }
 
 exports.message = async (req, res) => {
-  const { email, subject, message } = req.body
-  if (!email || !subject || !message) {
-    res.status(400).json({ error: 'All fields required' })
+  const { subject, message } = req.body
+  if (!subject || !message) {
+    return res.status(400).json({ error: 'All fields required' })
   }
+
   try {
+    const user = await User.findOne({ email: req.user.email }).exec()
+
+    const messagesCount = await Message.countDocuments({
+      postedBy: user._id,
+    })
+
+    if (messagesCount >= 5) {
+      return res.status(400).json({
+        error:
+          'You cannot post more than 5 messages, for any other help please contact us on whatsApp 054-665-9069',
+      })
+    }
+
     await new Message({
-      email,
       subject,
       message,
+      postedBy: user._id,
     }).save()
 
     res.status(201).json({ ok: true })
   } catch (error) {
     res.status(400).json({ error: error.message })
+  }
+}
+
+exports.readMessages = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.user.email }).exec()
+    const messages = await Message.find({ postedBy: user._id })
+      .populate('postedBy', 'email')
+      .sort([['createdAt', 'desc']])
+      .exec()
+
+    if (!messages) {
+      res.status(400).json({ error: 'No messages found' })
+    }
+    res.status(200).json(messages)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
 }

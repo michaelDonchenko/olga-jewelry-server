@@ -30,8 +30,6 @@ exports.orders = async (req, res) => {
       error: 'Server error',
     })
   }
-
-  res.json(orders)
 }
 
 exports.order = async (req, res) => {
@@ -90,6 +88,7 @@ exports.readMessages = async (req, res) => {
 
   try {
     const messages = await Message.find({})
+      .populate('postedBy', 'email')
       .limit(parseInt(pageSize))
       .skip(pageSize * (page - 1))
       .sort([['createdAt', -1]])
@@ -99,13 +98,38 @@ exports.readMessages = async (req, res) => {
         error: 'Could not find comments',
       })
     }
-    res.json({
+    res.status(200).json({
       messages,
       page,
       pages: Math.ceil(count / pageSize),
       pageSize: pageSize,
     })
   } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+exports.messageAnswer = async (req, res) => {
+  const id = req.params.id
+  const { answer } = req.body
+  try {
+    const answered = Message.findByIdAndUpdate(
+      id,
+      { answer },
+      { new: true }
+    ).exec()
+
+    if (!answer) {
+      return res.status(400).json({ error: 'Answer is required' })
+    }
+
+    if (!answered) {
+      return res.status(400).json({ error: 'Could not post answer' })
+    }
+
+    return res.status(201).json({ ok: true })
+  } catch (error) {
+    console.log(error.message)
     res.status(500).json({ error: error.message })
   }
 }

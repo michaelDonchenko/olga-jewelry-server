@@ -51,9 +51,10 @@ exports.listAll = async (req, res) => {
 
   try {
     const products = await Product.find({})
+      .populate('category')
       .limit(parseInt(pageSize))
       .skip(pageSize * (page - 1))
-      .populate('category')
+
       .sort([[sort, Number(order)]])
 
     if (!products) {
