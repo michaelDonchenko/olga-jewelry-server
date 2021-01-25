@@ -182,8 +182,15 @@ exports.readOrder = async (req, res) => {
 exports.orders = async (req, res) => {
   const user = await User.findOne({ email: req.user.email }).exec()
 
+  //pagination variables
+  const pageSize = req.query.pageSize || 8
+  const page = Number(req.query.pageNumber) || 1
+  const count = await Order.countDocuments({ orderdBy: user._id })
+
   let userOrders = await Order.find({ orderdBy: user._id })
     .populate('products.product')
+    .limit(parseInt(pageSize))
+    .skip(pageSize * (page - 1))
     .sort([['createdAt', 'desc']])
     .exec()
 
@@ -191,7 +198,12 @@ exports.orders = async (req, res) => {
     return res.status(400).json({ error: 'No orders found' })
   }
 
-  res.json(userOrders)
+  res.json({
+    userOrders,
+    page,
+    pages: Math.ceil(count / pageSize),
+    pageSize: pageSize,
+  })
 }
 
 exports.paypalPayment = async (req, res) => {
