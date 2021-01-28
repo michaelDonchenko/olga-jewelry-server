@@ -9,14 +9,12 @@ const {
   orders,
   order,
   updateOrder,
-  readMessages,
-  messageAnswer,
+  EditRules,
 } = require('../controllers/adminControllers')
 
 router.get('/admin/orders', authCheck, adminCheck, orders)
 router.get('/admin/order/:id', authCheck, adminCheck, order)
 router.put('/admin/order/:id', authCheck, adminCheck, updateOrder)
-router.get('/admin/messages', authCheck, adminCheck, readMessages)
-router.put('/admin/messageAnswer/:id', authCheck, adminCheck, messageAnswer)
+router.post('/admin/edit', authCheck, adminCheck, EditRules)
 
 module.exports = router

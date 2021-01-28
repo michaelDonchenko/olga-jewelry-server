@@ -2,8 +2,8 @@ const User = require('../models/userModel')
 const Product = require('../models/productModel')
 const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
-const Message = require('../models/messageModel')
 const uniqueid = require('uniqid')
+const SiteRule = require('../models/siteRuleModel')
 
 exports.userCart = async (req, res) => {
   const { cart } = req.body
@@ -231,50 +231,14 @@ exports.paypalPayment = async (req, res) => {
   }
 }
 
-exports.message = async (req, res) => {
-  const { subject, message } = req.body
-  if (!subject || !message) {
-    return res.status(400).json({ error: 'All fields required' })
-  }
-
+exports.readRules = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.user.email }).exec()
+    const rules = await SiteRule.findOne().exec()
 
-    const messagesCount = await Message.countDocuments({
-      postedBy: user._id,
-    })
-
-    if (messagesCount >= 5) {
-      return res.status(400).json({
-        error:
-          'You cannot post more than 5 messages, for any other help please contact us on whatsApp 054-665-9069',
-      })
+    if (!rules) {
+      res.status(400).json({ error: 'No rules found' })
     }
-
-    await new Message({
-      subject,
-      message,
-      postedBy: user._id,
-    }).save()
-
-    res.status(201).json({ ok: true })
-  } catch (error) {
-    res.status(400).json({ error: error.message })
-  }
-}
-
-exports.readMessages = async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.user.email }).exec()
-    const messages = await Message.find({ postedBy: user._id })
-      .populate('postedBy', 'email')
-      .sort([['createdAt', 'desc']])
-      .exec()
-
-    if (!messages) {
-      res.status(400).json({ error: 'No messages found' })
-    }
-    res.status(200).json(messages)
+    res.status(200).json(rules)
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
