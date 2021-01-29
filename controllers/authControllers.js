@@ -1,7 +1,7 @@
 const User = require('../models/userModel')
 
 exports.createUser = async (req, res) => {
-  const { email, picture } = req.user
+  const { email } = req.user
   try {
     const userExist = await User.findOne({ email: email })
 
@@ -13,8 +13,6 @@ exports.createUser = async (req, res) => {
     } else {
       const newUser = await new User({
         email,
-        name: email.split('@')[0],
-        picture,
       }).save()
       res.json(newUser)
     }
@@ -33,6 +31,26 @@ exports.login = async (req, res) => {
       }
       res.json(user)
     })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error: 'Server Error' })
+  }
+}
+
+exports.googleLogin = async (req, res) => {
+  const { email } = req.user
+
+  try {
+    const userExist = await User.findOne({ email: email })
+
+    if (userExist) {
+      return res.status(200).json(userExist)
+    } else {
+      const newUser = await new User({
+        email,
+      }).save()
+      res.json(newUser)
+    }
   } catch (error) {
     console.log(error)
     return res.status(500).json({ error: 'Server Error' })
