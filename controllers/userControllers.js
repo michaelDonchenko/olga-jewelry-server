@@ -236,9 +236,9 @@ exports.readRules = async (req, res) => {
     const rules = await SiteRule.findOne().exec()
 
     if (!rules) {
-      res.status(400).json({ error: 'No rules found' })
+      return res.status(400).json({ msg: 'no site rules yet' })
     }
-    res.status(200).json(rules)
+    return res.status(200).json(rules)
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
